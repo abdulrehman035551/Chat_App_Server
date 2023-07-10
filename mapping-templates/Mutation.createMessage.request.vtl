@@ -1,0 +1,25 @@
+#set($messageId = $util.autoId())
+#set($body = $ctx.args.body)
+#set($createdAt = $util.time.nowISO8601())
+#set($handle = $ctx.identity.username)
+
+{
+  "version": "2017-02-28",
+  "operation": "PutItem",
+  "key": {
+    "messageId": {
+      "S": "$messageId"
+    }
+  },
+  "attributeValues": {
+    "body": {
+      "S": "$body"
+    },
+    "createdAt": {
+      "S": "$createdAt"
+    },
+    "handle": {
+      "S": "$handle"
+    }
+  }
+}

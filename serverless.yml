@@ -1,0 +1,39 @@
+service: server
+
+frameworkVersion: "3"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  profile: default
+
+custom:
+  appSync:
+    name: my-chat-application
+    authenticationType: AMAZON_COGNITO_USER_POOLS
+    userPoolConfig:
+      userPoolId: !Ref CognitoUserPool
+      awsRegion: us-east-1
+      defaultAction: ALLOW
+    mappingTemplatesLocation: ./mapping-templates
+    mappingTemplates:
+      - type: Query
+        field: getMessages
+        dataSource: ChatAppDataSource
+      - type: Mutation
+        field: createMessage
+        dataSource: ChatAppDataSource
+    dataSources:
+      - type: AMAZON_DYNAMODB
+        name: ChatAppDataSource
+        config: 
+          tableName: !Ref MessagesTable2
+          serviceRoleArn: { Fn::GetAtt: [AppSyncDynamoDBServiceRole, Arn] }
+
+             
+plugins:
+  - serverless-appsync-plugin
+
+resources:
+  Resources:
+    ${file(resources.yml)}

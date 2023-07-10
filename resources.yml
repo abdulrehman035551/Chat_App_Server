@@ -1,0 +1,75 @@
+# Message table
+MessagesTable2:
+  Type: "AWS::DynamoDB::Table"
+  Properties:
+    TableName: "MessageTable2"
+    AttributeDefinitions:
+      - AttributeName: "messageId"
+        AttributeType: "S"
+      - AttributeName: "handle"
+        AttributeType: "S" 
+    KeySchema:
+      - AttributeName: "messageId"
+        KeyType: "HASH"
+    ProvisionedThroughput:
+      ReadCapacityUnits: 5
+      WriteCapacityUnits: 5
+    GlobalSecondaryIndexes:
+      - IndexName: "handle"
+        KeySchema:
+          - AttributeName: "handle"
+            KeyType: "HASH"
+        Projection:
+          ProjectionType: "ALL"
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+  
+
+# Congito UserPool
+CognitoUserPool:
+  Type: AWS::Cognito::UserPool
+  Properties:
+    UserPoolName: "ChatAppUserPool"
+    UsernameAttributes:
+      - "email"
+    AutoVerifiedAttributes:
+      - "email"
+
+# UserPoolClient
+UserPoolClient:
+  Type: "AWS::Cognito::UserPoolClient"
+  Properties:
+    ClientName: "Web"
+    GenerateSecret: false
+    UserPoolId: !Ref CognitoUserPool
+
+AppSyncDynamoDBServiceRole:
+  Type: AWS::IAM::Role
+  Properties:
+    RoleName: AppSyncDynamoDBServiceRole
+    AssumeRolePolicyDocument:
+      Version: "2012-10-17"
+      Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+              - appsync.amazonaws.com
+          Action:
+            - sts:AssumeRole
+    Policies:
+      - PolicyName: AppSyncDynamoDBPolicy
+        PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - "dynamodb:PutItem"
+                - "dynamodb:Query"
+
+                - "dynamodb:GetItem"
+                - "dynamodb:Scan"
+                - "dynamodb:UpdateItem"
+                - "dynamodb:DeleteItem"
+              Resource:
+                - "arn:aws:dynamodb:us-east-1:300205417350:table/MessageTable2"
